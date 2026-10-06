@@ -1,0 +1,235 @@
+
+### What is `__name__`?
+
+Python has a secret hidden label attached to every `.py` file called `__name__`.
+
+Whenever Python touches a file, it asks one question:
+
+	> *"Did the user press RUN on this specific file right now?"*
+
+* If the answer is **YES** (you pressed the green run button on this file):
+Python gives it the honorary title:
+```python
+__name__ = "__main__"
+
+```
+
+
+* If the answer is **NO** (this file was only pulled in via `import` by another file):
+Python gives it its real file name:
+```python
+__name__ = "script1"
+
+```
+
+
+
+---
+
+### Step 1: Let's Look at the Code Line by Line
+
+	-> We will create two files: `script1.py` and `script2.py`.
+
+#### File 1: `script1.py`
+
+```python
+# LINE 1
+def favorite_food(food):
+    # LINE 2
+    print(f"Your favorite food is {food}")
+
+# LINE 3
+def main():
+    # LINE 4
+    print("This is script1")
+    # LINE 5
+    favorite_food("pizza")
+    # LINE 6
+    print("Goodbye from script1!")
+
+# LINE 7
+if __name__ == '__main__':
+    # LINE 8
+    main()
+
+```
+
+#### File 2: `script2.py`
+
+```python
+# LINE A
+import script1
+
+# LINE B
+def favorite_drink(drink):
+    # LINE C
+    print(f"Your favorite drink is {drink}")
+
+# LINE D
+def main():
+    # LINE E
+    print("This is script2")
+    # LINE F
+    script1.favorite_food("sushi")
+    # LINE G
+    favorite_drink("coffee")
+    # LINE H
+    print("Goodbye from script2!")
+
+# LINE I
+if __name__ == '__main__':
+    # LINE J
+    main()
+
+```
+
+---
+
+### Step 2: Line-by-Line Visual Execution: Running `script1.py`
+
+You open `script1.py` in your editor and click **RUN**.
+
+```text
+STEP 1: You clicked RUN on script1.py.
+        Python sets script1's secret variable:
+        __name__ = "__main__"
+
+STEP 2: [LINE 1] def favorite_food(food):
+        Python memorizes the recipe for favorite_food. Does not run it yet.
+
+STEP 3: [LINE 3] def main():
+        Python memorizes the recipe for main. Does not run it yet.
+
+STEP 4: [LINE 7] if __name__ == '__main__':
+        Python evaluates: Is "__main__" == "__main__"?
+        Answer: TRUE! ✅
+
+STEP 5: [LINE 8] main() is called!
+        │
+        ├──► [LINE 4] prints: "This is script1"
+        ├──► [LINE 5] calls favorite_food("pizza")
+        │       └──► [LINE 2] prints: "Your favorite food is pizza"
+        └──► [LINE 6] prints: "Goodbye from script1!"
+
+PROGRAM FINISHED.
+
+```
+
+**Terminal Output:**
+
+```text
+This is script1
+Your favorite food is pizza
+Goodbye from script1!
+
+```
+
+---
+
+### Step 3: Line-by-Line Visual Execution: Running `script2.py`
+
+Now, you click **RUN on `script2.py**`. Watch what happens to both files step by step:
+
+```text
+STEP 1: You clicked RUN on script2.py.
+        Python sets script2's secret variable:
+        __name__ = "__main__"
+
+STEP 2: [LINE A] import script1
+        Python pauses script2 and opens script1.py to read it!
+
+```
+
+#### What happens inside `script1.py` right now?
+
+```text
+        Because script1 was IMPORTED (not clicked Run directly):
+        Python gives script1: __name__ = "script1"
+
+        [LINE 1] memorizes favorite_food
+        [LINE 3] memorizes main
+
+        [LINE 7] if __name__ == '__main__':
+                 Python checks: Is "script1" == "__main__"?
+                 Answer: FALSE! ❌
+
+        Because it is False, Python SKIPS LINE 8!
+        It does NOT run script1's main()! It doesn't print pizza!
+
+```
+
+#### Python returns to `script2.py`:
+
+```text
+STEP 3: [LINE B] def favorite_drink(drink):
+        Python memorizes favorite_drink.
+
+STEP 4: [LINE D] def main():
+        Python memorizes script2's main.
+
+STEP 5: [LINE I] if __name__ == '__main__':
+        Python checks script2's secret variable:
+        Is "__main__" == "__main__"?
+        Answer: TRUE! ✅
+
+STEP 6: [LINE J] runs script2's main()!
+        │
+        ├──► [LINE E] prints: "This is script2"
+        │
+        ├──► [LINE F] script1.favorite_food("sushi")
+        │       Python jumps into script1's recipe and runs LINE 2:
+        │       prints: "Your favorite food is sushi"
+        │
+        ├──► [LINE G] favorite_drink("coffee")
+        │       runs LINE C:
+        │       prints: "Your favorite drink is coffee"
+        │
+        └──► [LINE H] prints: "Goodbye from script2!"
+
+PROGRAM FINISHED.
+
+```
+
+**Terminal Output:**
+
+```text
+This is script2
+Your favorite food is sushi
+Your favorite drink is coffee
+Goodbye from script2!
+
+```
+
+---
+
+### Step 4: The Big "Aha!" Moment
+
+Look at what would have happened if we **didn't** have `if __name__ == '__main__':` in `script1.py`:
+
+```python
+# Bad script1.py:
+def favorite_food(food):
+    print(f"Your favorite food is {food}")
+
+# Just called directly at the bottom:
+favorite_food("pizza")
+
+```
+
+If you ran `script2.py`:
+
+```python
+import script1  # 💥 BOOM! It immediately prints: "Your favorite food is pizza"
+
+```
+
+Before `script2` even started doing its own job, `script1`'s code ran automatically! You didn't want that—you only wanted to borrow the `favorite_food()` function to use with `"sushi"`.
+
+---
+
+### Summary Checklist to Remember Forever
+
+1. **`__name__`** is just an automatic string variable created by Python.
+2. If you clicked **Run** on the file: `__name__` is `"__main__"`.
+3. If another file used **`import`**: `__name__` is the file's filename (e.g., `"script1"`).
+4. **`if __name__ == '__main__':`** means: *"Only execute this if the user started the program right here from this file."*
